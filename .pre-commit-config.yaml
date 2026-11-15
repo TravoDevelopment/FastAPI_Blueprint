@@ -65,6 +65,24 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
+      - id: data-acquisition-ruff
+        name: ruff (data-acquisition)
+        entry: uv run --directory services/data-acquisition task check
+        language: system
+        types: [python]
+        files: ^services/data-acquisition/
+        pass_filenames: false
+
+      - id: data-acquisition-mypy
+        name: mypy (data-acquisition)
+        entry: uv run --directory services/data-acquisition mypy .
+        language: system
+        types: [python]
+        # platform-kit changes can break the service's types too.
+        files: ^(services/data-acquisition|packages/platform-kit)/
+        pass_filenames: false
+        stages: [pre-push]
+
       - id: platform-kit-checks
         name: ruff + mypy (platform-kit)
         entry: uv run --directory packages/platform-kit task check
