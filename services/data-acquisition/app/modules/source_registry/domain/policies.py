@@ -14,7 +14,13 @@ source registry is checked, and a rule cannot be skipped.
 
 from typing import TYPE_CHECKING
 
-from app.modules.source_registry.domain.exceptions import InvalidSourceRegistryState, SourceRegistryCodeTaken
+from app.modules.source_registry.domain.exceptions import (
+    InvalidSourceRegistryState,
+    SourceConfigurationNotFound,
+    SourceConnectorUnavailable,
+    SourceDisabled,
+    SourceRegistryCodeTaken,
+)
 from app.modules.source_registry.domain.value_objects import SourceRegistryCode, SourceRegistryStatus
 
 if TYPE_CHECKING:  # type hints only: entities.py imports this file, so no runtime import back
@@ -49,3 +55,29 @@ def ensure_can_delete(source_registry: "SourceRegistry") -> None:
     """Only an archived source registry can be deleted (archive it first)."""
     if source_registry.status is not SourceRegistryStatus.ARCHIVED:
         raise InvalidSourceRegistryState("Archive the source registry before deleting it")
+
+
+def ensure_enable_eligible(*, active_configuration_exists: bool, connector_available: bool) -> None:
+    """Check configuration existence before availability of its exact connector."""
+    if not active_configuration_exists:
+        raise SourceConfigurationNotFound("Active source configuration not found")
+    if not connector_available:
+        raise SourceConnectorUnavailable("Active source configuration connector is unavailable")
+
+
+def ensure_replacement_eligible(*, connector_available: bool) -> None:
+    """Require an available connector for a validated replacement, even on a disabled source."""
+    if not connector_available:
+        raise SourceConnectorUnavailable("Replacement source configuration connector is unavailable")
+
+
+def ensure_collection_eligible(
+    *, is_enabled: bool, selected_configuration_exists: bool, connector_available: bool
+) -> None:
+    """Check enabled state, selected configuration existence, then its connector availability."""
+    if not is_enabled:
+        raise SourceDisabled("Source is disabled for collection")
+    if not selected_configuration_exists:
+        raise SourceConfigurationNotFound("Selected source configuration not found")
+    if not connector_available:
+        raise SourceConnectorUnavailable("Selected source configuration connector is unavailable")

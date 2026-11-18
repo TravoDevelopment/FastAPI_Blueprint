@@ -64,6 +64,42 @@ class InvalidConnectorIdentity(InvalidSourceConfiguration):
     code = "invalid_connector_identity"
 
 
+class DuplicateSourceName(ConflictError):
+    """Another source has the same name after whitespace normalization and case-insensitive comparison (SR-003)."""
+
+    code = "duplicate_source_name"
+
+
+class SourceNotFound(NotFoundError):
+    """No acquisition source exists with the requested ID."""
+
+    code = "source_not_found"
+
+
+class SourceConfigurationNotFound(NotFoundError):
+    """The active or explicitly requested configuration version does not exist."""
+
+    code = "source_configuration_not_found"
+
+
+class SourceDisabled(ConflictError):
+    """A disabled source cannot be resolved for collection."""
+
+    code = "source_disabled"
+
+
+class SourceConnectorUnavailable(ConflictError):
+    """The configuration's exact connector key and version are not available."""
+
+    code = "source_connector_unavailable"
+
+
+class SourceConcurrentModification(ConflictError):
+    """A concurrent write prevented the source change from being saved."""
+
+    code = "source_concurrent_modification"
+
+
 class InvalidSourceRegistryName(UnprocessableError):
     """The name is not 3-120 characters long."""
 

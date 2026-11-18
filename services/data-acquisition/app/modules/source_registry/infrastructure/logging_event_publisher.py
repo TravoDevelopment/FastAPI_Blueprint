@@ -12,19 +12,19 @@ from platform_kit.database import UnitOfWork
 
 from app.core.logging import logger
 from app.modules.source_registry.application.ports import EventPublisher
-from app.modules.source_registry.domain.events import DomainEvent
+from app.modules.source_registry.domain.events import PublishableEvent
 
 
 class LoggingEventPublisher(EventPublisher):
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
 
-    def publish_after_commit(self, events: Sequence[DomainEvent]) -> None:
+    def publish_after_commit(self, events: Sequence[PublishableEvent]) -> None:
         if events:
             self.uow.after_commit(self._log, list(events))
 
     @staticmethod
-    async def _log(events: list[DomainEvent]) -> None:
+    async def _log(events: list[PublishableEvent]) -> None:
         for event in events:
             payload = {k: str(v) for k, v in asdict(event).items()}
             logger.info("domain_event_published", event_name=event.name, **payload)

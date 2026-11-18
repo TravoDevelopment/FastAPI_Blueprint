@@ -30,3 +30,43 @@ class SourceRegistryCreated(DomainEvent):
 @dataclass(frozen=True, slots=True)
 class SourceRegistryArchived(DomainEvent):
     pass
+
+
+@dataclass(frozen=True, slots=True)
+class SourceEvent:
+    """A change to an acquisition source, recorded before any publication."""
+
+    source_id: UUID
+    occurred_at: datetime
+
+    @property
+    def name(self) -> str:
+        return type(self).__name__
+
+
+@dataclass(frozen=True, slots=True)
+class SourceRegistered(SourceEvent):
+    version: int
+
+
+@dataclass(frozen=True, slots=True)
+class SourceMetadataUpdated(SourceEvent):
+    changed_fields: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class SourceEnabled(SourceEvent):
+    version: int
+
+
+@dataclass(frozen=True, slots=True)
+class SourceDisabled(SourceEvent):
+    version: int
+
+
+@dataclass(frozen=True, slots=True)
+class SourceConfigurationCreated(SourceEvent):
+    version: int
+
+
+type PublishableEvent = DomainEvent | SourceEvent

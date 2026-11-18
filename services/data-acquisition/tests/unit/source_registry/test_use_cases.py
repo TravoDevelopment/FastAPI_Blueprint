@@ -7,11 +7,13 @@ from uuid import uuid4
 
 import pytest
 
+from app.modules.source_registry.application.ports import EventPublisher
 from app.modules.source_registry.application.use_cases import (
     CreateSourceRegistryCommand,
     SourceRegistryUseCases,
     UpdateSourceRegistryCommand,
 )
+from app.modules.source_registry.domain.events import SourceRegistered, SourceRegistryCreated
 from app.modules.source_registry.domain.exceptions import (
     InvalidSourceRegistryState,
     SourceRegistryCodeTaken,
@@ -36,6 +38,18 @@ def events() -> FakeEventPublisher:
 @pytest.fixture
 def use_cases(repo: FakeSourceRegistryRepository, events: FakeEventPublisher) -> SourceRegistryUseCases:
     return SourceRegistryUseCases(repo, events, clock=lambda: NOW)  # fixed clock: predictable timestamps
+
+
+def test_event_publisher_accepts_both_source_event_families(events: FakeEventPublisher) -> None:
+    """The same port accepts new and generated events without changing their payloads."""
+    publisher: EventPublisher = events
+    source_event = SourceRegistered(uuid4(), NOW, version=1)
+    generated_event = SourceRegistryCreated(uuid4(), NOW, code="ITM-001")
+
+    publisher.publish_after_commit([source_event, generated_event])
+
+    assert events.published == [source_event, generated_event]
+    assert events.names == ["SourceRegistered", "SourceRegistryCreated"]
 
 
 async def test_create_saves_and_publishes_created(

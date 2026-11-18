@@ -8,10 +8,10 @@ Implemented by `LoggingEventPublisher` today; an outbox + message broker adapter
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
-from app.modules.source_registry.domain.events import DomainEvent
+from app.modules.source_registry.domain.events import PublishableEvent
 
 
 class EventPublisher(ABC):
     @abstractmethod
-    def publish_after_commit(self, events: Sequence[DomainEvent]) -> None:
+    def publish_after_commit(self, events: Sequence[PublishableEvent]) -> None:
         """Publishes the events only if the current transaction commits."""

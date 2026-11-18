@@ -9,7 +9,7 @@ from uuid import UUID
 
 from app.modules.source_registry.application.ports import EventPublisher, SourceRegistryPage, SourceRegistryRepository
 from app.modules.source_registry.domain.entities import SourceRegistry
-from app.modules.source_registry.domain.events import DomainEvent
+from app.modules.source_registry.domain.events import PublishableEvent
 from app.modules.source_registry.domain.exceptions import SourceRegistryNotFound
 from app.modules.source_registry.domain.value_objects import SourceRegistryCode, SourceRegistryStatus
 
@@ -54,9 +54,9 @@ class FakeSourceRegistryRepository(SourceRegistryRepository):
 
 class FakeEventPublisher(EventPublisher):
     def __init__(self) -> None:
-        self.published: list[DomainEvent] = []  # tests assert on this list
+        self.published: list[PublishableEvent] = []  # tests assert on this list
 
-    def publish_after_commit(self, events: Sequence[DomainEvent]) -> None:
+    def publish_after_commit(self, events: Sequence[PublishableEvent]) -> None:
         self.published.extend(events)
 
     @property
