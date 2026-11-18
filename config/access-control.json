@@ -65,6 +65,21 @@
           "deleteItem"
         ]
       }
+    },
+    "dataAcquisitionSourceRegistry": {
+      "name": "Data Acquisition: source registry",
+      "description": "Create, read, update, archive, restore and delete source registry.",
+      "endpoints": {
+        "data-acquisition": [
+          "createSourceRegistry",
+          "listSourceRegistry",
+          "getSourceRegistry",
+          "updateSourceRegistry",
+          "archiveSourceRegistry",
+          "restoreSourceRegistry",
+          "deleteSourceRegistry"
+        ]
+      }
     }
   },
   "roles": {
@@ -73,13 +88,15 @@
     ],
     "user": [
       "ownAccount",
-      "monitoringItems"
+      "monitoringItems",
+      "dataAcquisitionSourceRegistry"
     ],
     "admin": [
       "ownAccount",
       "userAdministration",
       "auditRead",
-      "monitoringItems"
+      "monitoringItems",
+      "dataAcquisitionSourceRegistry"
     ]
   }
 }
