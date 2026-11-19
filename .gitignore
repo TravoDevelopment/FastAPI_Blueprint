@@ -255,3 +255,6 @@ services/*/uploads/
 *.tfstate
 *.tfstate.*
 *.tfplan
+
+# Technical Testing Document
+services/data-acquisition/docs/TTD
