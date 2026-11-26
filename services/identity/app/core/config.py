@@ -59,7 +59,11 @@ class Configs(BaseSettings):
     SERVICE_NAME: str = "identity"
     # The central access document: config/access-control.json in the repository (baked into the image
     # at /app/config/access-control.json; mount a ConfigMap over it to change access without a rebuild).
-    ACCESS_CONFIG_PATH: str = str(Path(__file__).resolve().parents[4] / "config" / "access-control.json")
+    ACCESS_CONFIG_PATH: str = str(
+        (Path(__file__).resolve().parents[4] if len(Path(__file__).resolve().parents) > 4 else Path(__file__).resolve().parents[2])
+        / "config"
+        / "access-control.json"
+    )
     # How often the document is checked for changes (0 = never re-read).
     ACCESS_RELOAD_SECONDS: float = 30.0
 

@@ -1,6 +1,6 @@
 # Database Design and Schema
 
-This document outlines the database schema, table columns, and relationships for the application. The system is designed on PostgreSQL, utilizing UUIDs for primary keys, foreign keys for relationships, and soft-delete/audit columns on all tables.
+This document outlines the PostgreSQL schemas, table columns, and relationships for the application. Services own separate schemas and define their own audit and deletion behavior.
 
 ## Entity Relationship Diagram
 
@@ -114,6 +114,20 @@ erDiagram
         timestamptz expires_at "Expiry (IDEMPOTENCY_TTL_HOURS)"
     }
 
+    acquisition_sources {
+        uuid id PK "Source ID"
+        varchar name "Display name (up to 120 characters)"
+        text name_key "Casefolded name (unique index)"
+        text description "Optional description"
+        boolean is_enabled "Available for scraping jobs"
+        jsonb source_urls "Canonical HTTPS URLs"
+        uuid created_by "Creator in identity service (no FK)"
+        uuid updated_by "Last editor in identity service (no FK)"
+        timestamptz created_at "Creation timestamp"
+        timestamptz updated_at "Last update timestamp"
+        int version "Update counter"
+    }
+
     users ||--o{ refresh_tokens : "sessions"
     users ||--o{ one_time_tokens : "verification/reset links"
 ```
@@ -124,7 +138,7 @@ erDiagram
 
 ### 1. Common Audit Columns (`BaseModel`)
 
-All tables inherit from `BaseModel` and include these columns automatically.
+Identity models that inherit from `BaseModel` include these columns automatically.
 
 | Column | Type | Constraints | Description & Comment |
 | :--- | :--- | :--- | :--- |
@@ -246,3 +260,23 @@ Responses of `POST`/`PATCH` requests sent with an `Idempotency-Key` header, so r
 | `response_headers` | `JSONB` | Nullable | Stored `Content-Type`, `Location`, `ETag`. |
 | `response_body` | `BYTEA` | Nullable | Stored body (up to 1 MiB). |
 | `expires_at` | `TIMESTAMPTZ` | Not Null, Indexed | After `IDEMPOTENCY_TTL_HOURS` the key may be reused; expired rows are purged by the worker. |
+
+---
+
+### 8. `data_acquisition.acquisition_sources` Table
+
+Stores Source Registry entries in the data-acquisition service schema (`DB_SCHEMA`, default `data_acquisition`).
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key | Application-assigned source identifier. |
+| `name` | `VARCHAR(120)` | Not Null | Display name with original casing. |
+| `name_key` | `TEXT` | Not Null, unique index `ix_acquisition_sources_name_key` | Unicode-casefolded display name for uniqueness and literal substring filtering. Casefolding can expand a valid display name beyond 120 characters. |
+| `description` | `TEXT` | Nullable | Optional summary of the source. |
+| `is_enabled` | `BOOLEAN` | Not Null, Indexed | Whether the source may be used for scraping jobs. |
+| `source_urls` | `JSONB` | Not Null | List of canonical HTTPS URLs for the source. |
+| `created_by` | `UUID` | Not Null | Identity-service actor who created the source; no cross-service foreign key. |
+| `updated_by` | `UUID` | Not Null | Identity-service actor who last updated the source; no cross-service foreign key. |
+| `created_at` | `TIMESTAMPTZ` | Not Null, Default: `now()` | Insertion timestamp. |
+| `updated_at` | `TIMESTAMPTZ` | Not Null, Default: `now()` | Last modification timestamp, updated by the ORM. |
+| `version` | `INTEGER` | Not Null | Application-managed update counter. |

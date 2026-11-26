@@ -257,3 +257,4 @@ services/*/uploads/
 *.tfplan
 
 services/data-acquisition/docs/TTD
+api/

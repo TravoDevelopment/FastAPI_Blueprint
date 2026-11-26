@@ -65,6 +65,21 @@
           "deleteItem"
         ]
       }
+    },
+    "dataAcquisitionSourceRegistry": {
+      "name": "Data Acquisition: source registry",
+      "description": "Register, list, read, update, enable, disable and delete acquisition sources.",
+      "endpoints": {
+        "data-acquisition": [
+          "registerSource",
+          "listSources",
+          "getSource",
+          "updateSource",
+          "enableSource",
+          "disableSource",
+          "deleteSource"
+        ]
+      }
     }
   },
   "roles": {
@@ -73,13 +88,15 @@
     ],
     "user": [
       "ownAccount",
-      "monitoringItems"
+      "monitoringItems",
+      "dataAcquisitionSourceRegistry"
     ],
     "admin": [
       "ownAccount",
       "userAdministration",
       "auditRead",
-      "monitoringItems"
+      "monitoringItems",
+      "dataAcquisitionSourceRegistry"
     ]
   }
 }

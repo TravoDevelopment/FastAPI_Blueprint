@@ -45,6 +45,10 @@
 
   - [List Audit Logs (admin) (GET `/v2/audit-logs/`)](#list-audit-logs)
 
+- **Data Acquisition Endpoints**
+
+  - [Update Source (PATCH `/v1/sources/{source_id}`)](#update-source)
+
 - **Health Endpoints**
 
   - [Liveness Probe (GET `/health/live`)](#liveness-probe)
@@ -2317,6 +2321,61 @@
 </details>
 
 ---
+## Data Acquisition Endpoints
+
+### <a id="update-source"></a>Update Source
+
+<details>
+<summary>Update Source</summary>
+
+| URL | Method | Auth Required | Description |
+| --- | --- | --- | --- |
+| `/v1/sources/{source_id}` | PATCH | Yes, bearer token and `updateSource` grant | Update the supplied details and record the authenticated actor as `updatedBy`. |
+
+> <details>
+> <summary>Request body</summary>
+>
+> The path requires a source UUID. Optional JSON fields: `name` (string), `description` (string or `null`), and `sourceUrls` (array of HTTPS URL strings; alias `source_urls`). Omit a field to leave it unchanged. Only `description` accepts `null`, which clears it.
+>
+> ```json
+> {"description": null}
+> ```
+> </details>
+>
+> <details>
+> <summary>Response body</summary>
+>
+> `200 OK` returns the updated source: `id`, `name`, `description`, `sourceUrls`, `isEnabled`, `createdBy`, `updatedBy`, `createdAt`, and `updatedAt`.
+> </details>
+>
+> <details>
+> <summary>Error body</summary>
+>
+> Responses use `application/problem+json` and include `status` and `code`. The route returns `401` for missing or invalid credentials, `403` for a missing grant, `404` for a missing source, `409` for a duplicate name or no change, `422` for invalid input, and `429` when rate limiting is enabled and the limit is exceeded.
+>
+> ```json
+> {"status": 409, "code": "source_not_modified"}
+> ```
+> </details>
+>
+> <details>
+> <summary>Request flow</summary>
+>
+> ```mermaid
+> flowchart LR
+>     A[1. PATCH source] --> B[2. Authorize actor]
+>     B --> C[3. Apply supplied fields]
+>     C --> D[4. Persist update]
+>     D --> E[5. Return source]
+>     classDef request fill:#dbeafe,stroke:#2563eb,color:#172554;
+>     classDef outcome fill:#dcfce7,stroke:#16a34a,color:#14532d;
+>     class A,B,C request;
+>     class D,E outcome;
+> ```
+> </details>
+
+</details>
+
 ## Health Endpoints
 
 ### <a id="liveness-probe"></a>Liveness Probe
