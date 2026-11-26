@@ -1,0 +1,1526 @@
+{
+  "components": {
+    "schemas": {
+      "ClaimScheduleOccurrenceRequest": {
+        "description": "Schedule identifier required to claim an existing occurrence.",
+        "properties": {
+          "scheduleId": {
+            "format": "uuid",
+            "title": "Scheduleid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scheduleId"
+        ],
+        "title": "ClaimScheduleOccurrenceRequest",
+        "type": "object"
+      },
+      "CreateScrapingScheduleRequest": {
+        "description": "Request body for creating a disabled weekly schedule.",
+        "properties": {
+          "frequency": {
+            "$ref": "#/components/schemas/ScheduleFrequency",
+            "default": "weekly"
+          },
+          "intervalDays": {
+            "default": 7,
+            "minimum": 1.0,
+            "title": "Intervaldays",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Name",
+            "type": "string"
+          },
+          "nextRunAt": {
+            "format": "date-time",
+            "title": "Nextrunat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "nextRunAt"
+        ],
+        "title": "CreateScrapingScheduleRequest",
+        "type": "object"
+      },
+      "CreatedScrapingJobsResponse": {
+        "description": "Child jobs created from a discovery snapshot.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScrapingJobResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "totalCount": {
+            "title": "Totalcount",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "totalCount"
+        ],
+        "title": "CreatedScrapingJobsResponse",
+        "type": "object"
+      },
+      "DiscoverScrapingJobsRequest": {
+        "description": "Snapshot of sources to turn into child scraping jobs.",
+        "properties": {
+          "discoverySnapshot": {
+            "items": {
+              "$ref": "#/components/schemas/DiscoverySource"
+            },
+            "title": "Discoverysnapshot",
+            "type": "array"
+          }
+        },
+        "required": [
+          "discoverySnapshot"
+        ],
+        "title": "DiscoverScrapingJobsRequest",
+        "type": "object"
+      },
+      "DiscoverySource": {
+        "description": "One source and category discovered for a parent execution.",
+        "properties": {
+          "categoryId": {
+            "format": "uuid",
+            "title": "Categoryid",
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "title": "Sourceid",
+            "type": "string"
+          },
+          "sourceUrl": {
+            "minLength": 1,
+            "title": "Sourceurl",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId",
+          "sourceUrl",
+          "categoryId"
+        ],
+        "title": "DiscoverySource",
+        "type": "object"
+      },
+      "FailScrapingJobRequest": {
+        "description": "Failure details recorded for a scraping or review attempt.",
+        "properties": {
+          "errorCode": {
+            "minLength": 1,
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "errorCode",
+          "retryable"
+        ],
+        "title": "FailScrapingJobRequest",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pageSize": {
+            "title": "Pagesize",
+            "type": "integer"
+          },
+          "totalCount": {
+            "title": "Totalcount",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "ParentExecutionResponse": {
+        "description": "Parent execution status and aggregate child-job summary.",
+        "properties": {
+          "cancelledCount": {
+            "title": "Cancelledcount",
+            "type": "integer"
+          },
+          "completedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completedat"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "discoveryCompleted": {
+            "title": "Discoverycompleted",
+            "type": "boolean"
+          },
+          "failedCount": {
+            "title": "Failedcount",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurrenceId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurrenceid"
+          },
+          "scheduleId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduleid"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ParentExecutionStatus"
+          },
+          "succeededCount": {
+            "title": "Succeededcount",
+            "type": "integer"
+          },
+          "totalCount": {
+            "title": "Totalcount",
+            "type": "integer"
+          },
+          "triggerType": {
+            "$ref": "#/components/schemas/TriggerType"
+          }
+        },
+        "required": [
+          "id",
+          "triggerType",
+          "status",
+          "scheduleId",
+          "occurrenceId",
+          "discoveryCompleted",
+          "createdAt",
+          "startedAt",
+          "completedAt",
+          "totalCount",
+          "succeededCount",
+          "failedCount",
+          "cancelledCount"
+        ],
+        "title": "ParentExecutionResponse",
+        "type": "object"
+      },
+      "ParentExecutionStatus": {
+        "enum": [
+          "discovering",
+          "running",
+          "succeeded",
+          "partial_failed",
+          "failed",
+          "cancelled"
+        ],
+        "title": "ParentExecutionStatus",
+        "type": "string"
+      },
+      "RecordScrapingResultRequest": {
+        "description": "Reference to the result produced by a scraper.",
+        "properties": {
+          "resultReference": {
+            "minLength": 1,
+            "title": "Resultreference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resultReference"
+        ],
+        "title": "RecordScrapingResultRequest",
+        "type": "object"
+      },
+      "RetryPolicyResponse": {
+        "description": "Retry settings exposed with a scraping job.",
+        "properties": {
+          "delaySeconds": {
+            "title": "Delayseconds",
+            "type": "integer"
+          },
+          "maxAttempts": {
+            "title": "Maxattempts",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "maxAttempts",
+          "delaySeconds"
+        ],
+        "title": "RetryPolicyResponse",
+        "type": "object"
+      },
+      "ScheduleFrequency": {
+        "enum": [
+          "weekly"
+        ],
+        "title": "ScheduleFrequency",
+        "type": "string"
+      },
+      "ScrapingJobList": {
+        "description": "One page of child jobs and its pagination metadata.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScrapingJobResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "title": "ScrapingJobList",
+        "type": "object"
+      },
+      "ScrapingJobResponse": {
+        "description": "One child scraping job as returned by the API.",
+        "properties": {
+          "categoryId": {
+            "format": "uuid",
+            "title": "Categoryid",
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "parentExecutionId": {
+            "format": "uuid",
+            "title": "Parentexecutionid",
+            "type": "string"
+          },
+          "resultReference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resultreference"
+          },
+          "retryPolicy": {
+            "$ref": "#/components/schemas/RetryPolicyResponse"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "title": "Sourceid",
+            "type": "string"
+          },
+          "sourceUrl": {
+            "title": "Sourceurl",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ScrapingJobStatus"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updatedat"
+          }
+        },
+        "required": [
+          "id",
+          "parentExecutionId",
+          "sourceId",
+          "sourceUrl",
+          "categoryId",
+          "status",
+          "resultReference",
+          "retryPolicy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ScrapingJobResponse",
+        "type": "object"
+      },
+      "ScrapingJobStatus": {
+        "enum": [
+          "queued",
+          "scraping",
+          "awaiting_review",
+          "handing_off",
+          "succeeded",
+          "retryable_failure",
+          "permanent_failure",
+          "cancelled",
+          "failed"
+        ],
+        "title": "ScrapingJobStatus",
+        "type": "string"
+      },
+      "ScrapingScheduleResponse": {
+        "description": "One schedule, including its enabled and soft-deleted state.",
+        "properties": {
+          "createdAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/ScheduleFrequency"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "intervalDays": {
+            "title": "Intervaldays",
+            "type": "integer"
+          },
+          "isDeleted": {
+            "title": "Isdeleted",
+            "type": "boolean"
+          },
+          "isEnabled": {
+            "title": "Isenabled",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "nextRunAt": {
+            "format": "date-time",
+            "title": "Nextrunat",
+            "type": "string"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updatedat"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "frequency",
+          "intervalDays",
+          "nextRunAt",
+          "isEnabled",
+          "isDeleted",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ScrapingScheduleResponse",
+        "type": "object"
+      },
+      "StartParentExecutionRequest": {
+        "description": "Request body for starting a manual or scheduled parent execution.",
+        "properties": {
+          "occurrenceId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurrenceid"
+          },
+          "scheduleId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduleid"
+          },
+          "triggerType": {
+            "$ref": "#/components/schemas/TriggerType"
+          }
+        },
+        "required": [
+          "triggerType"
+        ],
+        "title": "StartParentExecutionRequest",
+        "type": "object"
+      },
+      "TriggerType": {
+        "enum": [
+          "scheduled",
+          "manual"
+        ],
+        "title": "TriggerType",
+        "type": "string"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "description": "Access token issued by the identity service.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "The Data Acquisition domain service.",
+    "title": "Data Acquisition API",
+    "version": "0.0.0-dev"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "live_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Live Health Live Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Liveness Probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "ready_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readiness Probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/v1/parent-executions/": {
+      "post": {
+        "operationId": "startParentExecution",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartParentExecutionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParentExecutionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start a manual or scheduled parent execution",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/parent-executions/{parent_execution_id}/scraping-jobs": {
+      "get": {
+        "operationId": "listScrapingJobsByParentExecution",
+        "parameters": [
+          {
+            "description": "Parent execution identifier",
+            "in": "path",
+            "name": "parent_execution_id",
+            "required": true,
+            "schema": {
+              "description": "Parent execution identifier",
+              "format": "uuid",
+              "title": "Parent Execution Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page (max 100)",
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "description": "Items per page (max 100)",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Pagesize",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List child jobs for a parent execution",
+        "tags": [
+          "scraping-jobs"
+        ]
+      },
+      "post": {
+        "operationId": "discoverAndCreateScrapingJobs",
+        "parameters": [
+          {
+            "description": "Parent execution identifier",
+            "in": "path",
+            "name": "parent_execution_id",
+            "required": true,
+            "schema": {
+              "description": "Parent execution identifier",
+              "format": "uuid",
+              "title": "Parent Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverScrapingJobsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedScrapingJobsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create child jobs from a discovery snapshot",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/parent-executions/{parent_execution_id}:reconcile": {
+      "post": {
+        "operationId": "reconcileParentExecution",
+        "parameters": [
+          {
+            "description": "Parent execution identifier",
+            "in": "path",
+            "name": "parent_execution_id",
+            "required": true,
+            "schema": {
+              "description": "Parent execution identifier",
+              "format": "uuid",
+              "title": "Parent Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParentExecutionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recompute a parent execution summary from its child jobs",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/schedule-occurrences/{occurrence_id}:claim": {
+      "post": {
+        "operationId": "claimScheduleOccurrence",
+        "parameters": [
+          {
+            "description": "Schedule occurrence identifier",
+            "in": "path",
+            "name": "occurrence_id",
+            "required": true,
+            "schema": {
+              "description": "Schedule occurrence identifier",
+              "format": "uuid",
+              "title": "Occurrence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimScheduleOccurrenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParentExecutionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Claim a schedule occurrence and start its parent execution",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}": {
+      "get": {
+        "operationId": "getScrapingJob",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get a scraping job",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}:accept-review-handoff": {
+      "post": {
+        "operationId": "acceptScrapingReviewHandoff",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept the review handoff and complete a scraping job",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}:begin-review-handoff": {
+      "post": {
+        "operationId": "beginScrapingReviewHandoff",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Begin review handoff for a scraping result",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}:begin-scraping": {
+      "post": {
+        "operationId": "beginScrapingJob",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Begin scraping a queued job",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}:cancel": {
+      "post": {
+        "operationId": "cancelScrapingJob",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel a non-terminal scraping job",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}:fail": {
+      "post": {
+        "operationId": "failScrapingJob",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FailScrapingJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record a scraping job failure",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-jobs/{scraping_job_id}:record-result": {
+      "post": {
+        "operationId": "recordScrapingResult",
+        "parameters": [
+          {
+            "description": "Scraping job identifier",
+            "in": "path",
+            "name": "scraping_job_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping job identifier",
+              "format": "uuid",
+              "title": "Scraping Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordScrapingResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record a scraping result reference",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-schedules/": {
+      "post": {
+        "operationId": "createScrapingSchedule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScrapingScheduleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingScheduleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create a scraping schedule",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-schedules/{schedule_id}": {
+      "delete": {
+        "operationId": "deleteScrapingSchedule",
+        "parameters": [
+          {
+            "description": "Scraping schedule identifier",
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping schedule identifier",
+              "format": "uuid",
+              "title": "Schedule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Soft-delete a scraping schedule",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-schedules/{schedule_id}:disable": {
+      "post": {
+        "operationId": "disableScrapingSchedule",
+        "parameters": [
+          {
+            "description": "Scraping schedule identifier",
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping schedule identifier",
+              "format": "uuid",
+              "title": "Schedule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingScheduleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Disable a scraping schedule",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    },
+    "/v1/scraping-schedules/{schedule_id}:enable": {
+      "post": {
+        "operationId": "enableScrapingSchedule",
+        "parameters": [
+          {
+            "description": "Scraping schedule identifier",
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "description": "Scraping schedule identifier",
+              "format": "uuid",
+              "title": "Schedule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapingScheduleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Enable a scraping schedule",
+        "tags": [
+          "scraping-jobs"
+        ]
+      }
+    }
+  }
+}

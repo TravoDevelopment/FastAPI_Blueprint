@@ -2,6 +2,7 @@ from dependency_injector import containers, providers
 from platform_kit.database import Database, UnitOfWork
 
 from app.core.config import config
+from app.modules.scraping_jobs.container import ScrapingJobsContainer
 
 
 class Container(containers.DeclarativeContainer):
@@ -18,3 +19,5 @@ class Container(containers.DeclarativeContainer):
         statement_timeout_ms=config.DB_STATEMENT_TIMEOUT_MS,
     )
     uow = providers.Factory(UnitOfWork, db=db)
+
+    scraping_jobs = providers.Container(ScrapingJobsContainer, db=db, uow=uow)

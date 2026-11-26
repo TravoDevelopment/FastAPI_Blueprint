@@ -246,3 +246,166 @@ Responses of `POST`/`PATCH` requests sent with an `Idempotency-Key` header, so r
 | `response_headers` | `JSONB` | Nullable | Stored `Content-Type`, `Location`, `ETag`. |
 | `response_body` | `BYTEA` | Nullable | Stored body (up to 1 MiB). |
 | `expires_at` | `TIMESTAMPTZ` | Not Null, Indexed | After `IDEMPOTENCY_TTL_HOURS` the key may be reused; expired rows are purged by the worker. |
+
+## Data Acquisition Service (`data_acquisition` schema)
+
+The Data Acquisition service owns the following PostgreSQL tables. Its `AuditColumnsMixin` supplies `id`,
+`created_at`, `updated_at`, and `version`; unlike the Identity service's models, these tables do not inherit
+`is_active`, `is_deleted`, `created_by`, or `updated_by` unless those fields are defined below.
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    scraping_schedules {
+        uuid id PK
+        timestamptz created_at
+        timestamptz updated_at
+        int version
+        varchar name
+        varchar frequency
+        int interval_days
+        timestamptz next_run_at
+        boolean is_enabled
+        boolean is_deleted
+    }
+
+    parent_executions {
+        uuid id PK
+        timestamptz created_at
+        timestamptz updated_at
+        int version
+        varchar trigger_type
+        varchar status
+        uuid schedule_id FK
+        uuid occurrence_id FK
+        boolean discovery_completed
+        timestamptz started_at
+        timestamptz completed_at
+        int total_count
+        int succeeded_count
+        int failed_count
+        int cancelled_count
+    }
+
+    scraping_jobs {
+        uuid id PK
+        timestamptz created_at
+        timestamptz updated_at
+        int version
+        uuid parent_execution_id FK
+        uuid source_id
+        text source_url
+        uuid category_id
+        varchar status
+        text result_reference
+        int retry_max_attempts
+        int retry_delay_seconds
+    }
+
+    job_attempts {
+        uuid id PK
+        timestamptz created_at
+        timestamptz updated_at
+        int version
+        uuid scraping_job_id FK
+        varchar phase
+        int attempt_number
+        varchar status
+        timestamptz started_at
+        timestamptz finished_at
+        timestamptz next_retry_at
+        text error_code
+    }
+
+    schedule_occurrences {
+        uuid id PK
+        timestamptz created_at
+        timestamptz updated_at
+        int version
+        uuid schedule_id FK
+        text occurrence_key
+        timestamptz due_at
+        varchar status
+        uuid parent_execution_id FK
+    }
+
+    scraping_schedules ||--o{ parent_executions : schedules
+    scraping_schedules ||--o{ schedule_occurrences : generates
+    parent_executions ||--o{ scraping_jobs : contains
+    scraping_jobs ||--o{ job_attempts : records
+    parent_executions o|--o{ schedule_occurrences : claims
+    schedule_occurrences o|--o{ parent_executions : triggers
+```
+
+### Shared Data Acquisition Audit Columns
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key | Stable identifier for domain entities and their references. |
+| `created_at` | `TIMESTAMP WITH TIME ZONE` | Not Null, default `now()` | Records when the row was first persisted, preserving UTC-aware domain timestamps where supplied. |
+| `updated_at` | `TIMESTAMP WITH TIME ZONE` | Not Null, default `now()`, updated on ORM changes | Tracks persistence updates for operational diagnostics and ordering. |
+| `version` | `INTEGER` | Not Null, default `1` in the ORM | Supports the shared platform audit/version convention; repository updates increment it. |
+
+### `scraping_schedules`
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `name` | `VARCHAR(120)` | Not Null | Human-readable schedule name used by operators. |
+| `frequency` | `VARCHAR(24)` | Not Null | Persisted schedule frequency value, currently `weekly`. |
+| `interval_days` | `INTEGER` | Not Null, greater than `0` | Stores the configured cadence interval. |
+| `next_run_at` | `TIMESTAMPTZ` | Not Null, indexed with `is_enabled` | Determines when the due-schedule query may select this schedule. |
+| `is_enabled` | `BOOLEAN` | Not Null, default `false` | Stops or permits future schedule processing without removing its history. |
+| `is_deleted` | `BOOLEAN` | Not Null, default `false` | Soft-deletion flag; deleted schedules are excluded from due queries while retaining audit history. |
+
+### `parent_executions`
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `trigger_type` | `VARCHAR(24)` | Not Null | Records whether the parent run was `manual` or `scheduled`. |
+| `status` | `VARCHAR(32)` | Not Null, indexed | Stores discovery and aggregate execution state. |
+| `schedule_id` | `UUID` | Nullable FK to `scraping_schedules.id`, `ON DELETE SET NULL`, indexed | Links scheduled runs to their schedule while retaining execution history if a schedule is removed. |
+| `occurrence_id` | `UUID` | Nullable FK to `schedule_occurrences.id`, `ON DELETE SET NULL` | Records the occurrence that initiated the run, when applicable. |
+| `discovery_completed` | `BOOLEAN` | Not Null, default `false` | Distinguishes discovery in progress from the child-job execution phase. |
+| `started_at` | `TIMESTAMPTZ` | Nullable | Captures when execution started. |
+| `completed_at` | `TIMESTAMPTZ` | Nullable | Captures terminal completion time for duration and operational reporting. |
+| `total_count` | `INTEGER` | Not Null, default `0`, nonnegative | Number of child jobs discovered for the execution. |
+| `succeeded_count` | `INTEGER` | Not Null, default `0`, nonnegative | Number of successful child jobs in the latest summary. |
+| `failed_count` | `INTEGER` | Not Null, default `0`, nonnegative | Number of failed child jobs in the latest summary. |
+| `cancelled_count` | `INTEGER` | Not Null, default `0`, nonnegative | Number of cancelled child jobs in the latest summary. |
+
+### `scraping_jobs`
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `parent_execution_id` | `UUID` | Not Null FK to `parent_executions.id`, `ON DELETE CASCADE`, indexed | Associates each child job with the execution whose discovery created it. |
+| `source_id` | `UUID` | Not Null | Identifies a source owned outside this module; intentionally no cross-service foreign key is used. |
+| `source_url` | `TEXT` | Not Null | Stores the validated HTTP(S) URL that the scraper must process. |
+| `category_id` | `UUID` | Not Null | Identifies the source category owned outside this module; intentionally no cross-service foreign key is used. |
+| `status` | `VARCHAR(32)` | Not Null, indexed | Stores the job lifecycle state, including retryable and terminal outcomes. |
+| `result_reference` | `TEXT` | Nullable | Points to the produced scrape result without storing the result payload in the job row. |
+| `retry_max_attempts` | `INTEGER` | Not Null, default `3`, at least `1` | Persists the domain retry-policy limit used to bound attempts. |
+| `retry_delay_seconds` | `INTEGER` | Not Null, default `60`, nonnegative | Persists the retry-policy delay used to calculate the next retry time. |
+
+### `job_attempts`
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `scraping_job_id` | `UUID` | Not Null FK to `scraping_jobs.id`, `ON DELETE CASCADE`, indexed | Associates attempt history with its child scraping job. |
+| `phase` | `VARCHAR(24)` | Not Null | Distinguishes scraper attempts from review attempts. |
+| `attempt_number` | `INTEGER` | Not Null, at least `1`, unique with `scraping_job_id` | Orders retries and prevents duplicate attempt numbers for one job. |
+| `status` | `VARCHAR(32)` | Not Null | Records running, successful, retryable-failure, or permanent-failure state. |
+| `started_at` | `TIMESTAMPTZ` | Nullable | Records when the attempt began. |
+| `finished_at` | `TIMESTAMPTZ` | Nullable | Records when the attempt reached an outcome. |
+| `next_retry_at` | `TIMESTAMPTZ` | Nullable, indexed | Records the scheduled retry time when the attempt failed retryably. |
+| `error_code` | `TEXT` | Nullable | Preserves the failure code for diagnostics and retry decisions. |
+
+### `schedule_occurrences`
+
+| Column | Type | Constraints | Description & Comment |
+| :--- | :--- | :--- | :--- |
+| `schedule_id` | `UUID` | Not Null FK to `scraping_schedules.id`, `ON DELETE CASCADE`, indexed | Associates the occurrence with the schedule that generated it. |
+| `occurrence_key` | `TEXT` | Not Null, unique with `schedule_id` | Provides an idempotency key so the same schedule slot cannot be persisted twice. |
+| `due_at` | `TIMESTAMPTZ` | Not Null | Stores the scheduled time represented by this occurrence. |
+| `status` | `VARCHAR(24)` | Not Null | Persists pending, claimed, processing, completed, or failed state. |
+| `parent_execution_id` | `UUID` | Nullable FK to `parent_executions.id`, `ON DELETE SET NULL`, indexed | Links an occurrence to its claimed execution while preserving the occurrence if that execution is removed. |

@@ -7,7 +7,7 @@ startup is refused while an insecure default secret or placeholder is still conf
 
 from typing import Literal
 
-from pydantic import SecretStr, model_validator
+from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 INSECURE_SECRET_KEY = "dev-insecure-secret-key-change-me"
@@ -40,7 +40,12 @@ class ServiceSettings(BaseSettings):
 
     # --- Token verification: access tokens are issued by the identity service ---
     # Shared HS256 secret today; move to asymmetric keys + JWKS when more services trust the issuer.
-    JWT_SECRET_KEY: SecretStr = SecretStr(INSECURE_SECRET_KEY)
+    # Accept the issuer's SECRET_KEY in local service .env files, while retaining the
+    # explicit JWT_SECRET_KEY override used by existing deployments.
+    JWT_SECRET_KEY: SecretStr = Field(
+        default=SecretStr(INSECURE_SECRET_KEY),
+        validation_alias=AliasChoices("JWT_SECRET_KEY", "SECRET_KEY"),
+    )
     JWT_ALGORITHM: str = "HS256"
 
     # --- Access control: the central access document (config/access-control.json in the repository;

@@ -50,6 +50,10 @@
   - [Liveness Probe (GET `/health/live`)](#liveness-probe)
   - [Readiness Probe (GET `/health/ready`)](#readiness-probe)
 
+- **Data Acquisition Endpoints**
+
+  - [List Scraping Jobs by Parent Execution (GET `/v1/parent-executions/{parent_execution_id}/scraping-jobs`)](#list-scraping-jobs-by-parent-execution)
+
 - **Development Tools** (local development only)
 
   - [Generate Code Graph (POST `/admin/code-graphs/generate`)](#generate-code-graph)
@@ -2308,6 +2312,150 @@
 >     class Router route
 >     class Service service
 >     class Repo repo
+>     class DB db
+> ```
+>
+> </div>
+> </details>
+
+</details>
+
+---
+## Data Acquisition Endpoints
+
+### <a id="list-scraping-jobs-by-parent-execution"></a>List Scraping Jobs by Parent Execution
+
+<details>
+<summary>List Scraping Jobs by Parent Execution (GET /v1/parent-executions/{parent_execution_id}/scraping-jobs)</summary>
+
+| URL | Method | Auth Required | Description |
+| :--- | :--- | :--- | :--- |
+| `/v1/parent-executions/{parent_execution_id}/scraping-jobs` | GET | True (`listScrapingJobsByParentExecution`) | Returns one bounded page of child scraping jobs belonging to the parent execution. |
+
+> <details>
+> <summary>Request body</summary>
+>
+> **Path and query parameters:**
+>
+> - `parent_execution_id` (UUID, **Required**): Parent execution whose jobs are listed.
+> - `page` (integer, *Optional*, default `1`, minimum `1`): 1-based page number.
+> - `pageSize` (integer, *Optional*, default `20`, range `1`-`100`; snake_case alias `page_size` is not accepted by the HTTP query binding): Maximum number of jobs returned.
+>
+> No request body.
+>
+> ```text
+> GET /v1/parent-executions/4ce9c768-29a3-4f3d-b77c-61db0cb4c761/scraping-jobs?page=1&pageSize=20
+> ```
+> </details>
+>
+> <details>
+> <summary>Response body</summary>
+>
+> ```json
+> {
+>   "items": [
+>     {
+>       "id": "fc9912cc-8810-47a1-9c2a-3bd0e71e5624",
+>       "parentExecutionId": "4ce9c768-29a3-4f3d-b77c-61db0cb4c761",
+>       "sourceId": "96f92dc1-988a-48ba-8e61-08385f593b33",
+>       "sourceUrl": "https://example.com/products",
+>       "categoryId": "a9b1320f-daf7-4a81-83e4-d1d938639a54",
+>       "status": "queued",
+>       "resultReference": null,
+>       "retryPolicy": {
+>         "maxAttempts": 3,
+>         "delaySeconds": 60
+>       },
+>       "createdAt": "2026-11-25T10:00:00Z",
+>       "updatedAt": "2026-11-25T10:00:00Z"
+>     }
+>   ],
+>   "pageInfo": {
+>     "page": 1,
+>     "pageSize": 20,
+>     "totalCount": 1
+>   }
+> }
+> ```
+> </details>
+>
+> <details>
+> <summary>Error body</summary>
+>
+> **401 Unauthorized** (No valid authentication token):
+> ```json
+> {
+>   "type": "https://errors.example.com/not_authenticated",
+>   "title": "Unauthenticated",
+>   "status": 401,
+>   "detail": "Not authenticated",
+>   "instance": "<request path>",
+>   "code": "not_authenticated",
+>   "request_id": "8c1b2f0e-5d7a-4c1e-9f3b-2a6d4e8c0b1a"
+> }
+> ```
+>
+> **403 Forbidden** (The caller lacks the operation grant):
+> ```json
+> {
+>   "type": "https://errors.example.com/access_denied",
+>   "title": "Access Denied",
+>   "status": 403,
+>   "detail": "You do not have access to this operation",
+>   "instance": "<request path>",
+>   "code": "access_denied",
+>   "request_id": "8c1b2f0e-5d7a-4c1e-9f3b-2a6d4e8c0b1a"
+> }
+> ```
+>
+> **422 Unprocessable Entity** (The path UUID or `page`/`pageSize` value is invalid): RFC 9457 `validation_failed` Problem Details with the invalid parameter in `errors`.
+>
+> **429 Too Many Requests** (More than 200 requests/minute per client IP):
+> ```json
+> {
+>   "type": "https://errors.example.com/rate_limited",
+>   "title": "Too Many Requests",
+>   "status": 429,
+>   "detail": "Too many requests. Please try again later.",
+>   "instance": "<request path>",
+>   "code": "rate_limited",
+>   "request_id": "8c1b2f0e-5d7a-4c1e-9f3b-2a6d4e8c0b1a"
+> }
+> ```
+> </details>
+
+> <details>
+> <summary>Flow Diagram</summary>
+>
+> <div align="center">
+>
+> ```mermaid
+> flowchart TD
+>     Client([Client])
+>     Router[Scraping Jobs Router]
+>     UseCase[ScrapingJobUseCases.list_by_parent_page]
+>     Repository[ScrapingJobRepository]
+>     DB[(PostgreSQL)]
+>
+>     Client -->|1. GET parent jobs with page and pageSize| Router
+>     Router -->|2. Validate parameters and access grant| UseCase
+>     UseCase -->|3. Request bounded page and total| Repository
+>     Repository -->|4. Count and SELECT with offset/limit| DB
+>     DB -->|5. Page plus total count| Repository
+>     Repository -->|6. Return typed page| UseCase
+>     UseCase -->|7. Serialize items and pageInfo| Router
+>     Router -->|8. 200 OK| Client
+>
+>     classDef client fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+>     classDef route fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000
+>     classDef service fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+>     classDef repo fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#000
+>     classDef db fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
+>
+>     class Client client
+>     class Router route
+>     class UseCase service
+>     class Repository repo
 >     class DB db
 > ```
 >

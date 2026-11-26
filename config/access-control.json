@@ -65,6 +65,30 @@
           "deleteItem"
         ]
       }
+    },
+    "dataAcquisitionScrapingJobs": {
+      "name": "Data Acquisition: scraping jobs",
+      "description": "Manage scraping schedules, parent executions, and child job workflows.",
+      "endpoints": {
+        "data-acquisition": [
+          "getScrapingJob",
+          "listScrapingJobsByParentExecution",
+          "beginScrapingJob",
+          "recordScrapingResult",
+          "beginScrapingReviewHandoff",
+          "acceptScrapingReviewHandoff",
+          "failScrapingJob",
+          "cancelScrapingJob",
+          "createScrapingSchedule",
+          "enableScrapingSchedule",
+          "disableScrapingSchedule",
+          "deleteScrapingSchedule",
+          "startParentExecution",
+          "discoverAndCreateScrapingJobs",
+          "claimScheduleOccurrence",
+          "reconcileParentExecution"
+        ]
+      }
     }
   },
   "roles": {
@@ -73,13 +97,15 @@
     ],
     "user": [
       "ownAccount",
-      "monitoringItems"
+      "monitoringItems",
+      "dataAcquisitionScrapingJobs"
     ],
     "admin": [
       "ownAccount",
       "userAdministration",
       "auditRead",
-      "monitoringItems"
+      "monitoringItems",
+      "dataAcquisitionScrapingJobs"
     ]
   }
 }

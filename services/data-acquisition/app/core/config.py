@@ -2,12 +2,17 @@
 
 from pathlib import Path
 
+from pydantic_settings import SettingsConfigDict
 from platform_kit.settings import ServiceSettings
 
 _SERVICE_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(ServiceSettings):
+    # Resolve this service's .env independently of the shell's working directory. This
+    # keeps local token verification aligned with the identity service's service-local key.
+    model_config = SettingsConfigDict(env_file=str(_SERVICE_DIR / ".env"), extra="ignore")
+
     SERVICE_NAME: str = "data-acquisition"
     DB_SCHEMA: str = "data_acquisition"
     # The central access document (config/access-control.json in the repository). The image sets
